@@ -10,7 +10,6 @@ from slugify import slugify  # python-slugify
 # import datetime
 # from django.utils import timezone
 
-
 def create_slug(value: str):
     if value.count('.'):
         value = value.strip('.')
