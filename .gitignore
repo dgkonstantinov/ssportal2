@@ -1,0 +1,9 @@
+# Folders
+.venv
+.idea
+
+*/__pycache__/*
+*/migrations/*
+
+# Files
+*/__init__.py

@@ -1,0 +1,87 @@
+{% extends 'base/base.html' %}
+
+{% block title %}{{ title }} - SMDB{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">{{ title }}</h1>
+    <div class="d-flex gap-2">
+        <!-- Export Button (Admin Only) -->
+        <a href="{% url 'server:server_export' %}" class="btn btn-outline-success btn-sm user-restricted">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i>Экспорт CSV
+        </a>
+        <!-- Create Button (Admin Only) -->
+        <a href="{% url 'server:server_create' %}" class="btn btn-primary btn-sm user-restricted">
+            <i class="bi bi-plus-lg me-1"></i>Добавить сервер
+        </a>
+    </div>
+</div>
+
+<!-- Filter Tabs -->
+<div class="btn-group mb-3" role="group">
+    <a href="?filter=all" class="btn btn-outline-secondary {% if active_filter == 'all' %}active{% endif %}">Все</a>
+    <a href="?filter=active" class="btn btn-outline-success {% if active_filter == 'active' %}active{% endif %}">Активные</a>
+    <a href="?filter=reserve" class="btn btn-outline-warning {% if active_filter == 'reserve' %}active{% endif %}">В резерве</a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Серийный номер</th>
+                        <th>Модель</th>
+                        <th>CPU / RAM</th>
+                        <th>Локация</th>
+                        <th>Статус</th>
+                        <th style="width: 120px;" class="text-end">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for server in servers %}
+                    <tr>
+                        <td><span class="fw-semibold">{{ server.serial_number }}</span></td>
+                        <td>
+                            <div>{{ server.model.manufacturer.name }}</div>
+                            <small class="text-muted">{{ server.model.name }} ({{ server.form_factor }})</small>
+                        </td>
+                        <td>{{ server.cpu_count }}x / {{ server.ram_gb }} GB</td>
+                        <td>
+                            {% if server.rack %}
+                            <div>{{ server.rack.datacenter.name }}</div>
+                            <small class="text-muted">{{ server.rack.name }} U{{ server.rack_position }}</small>
+                            {% else %}
+                            <span class="text-muted">Не в стойке</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if server.is_active %}
+                            <span class="badge bg-success">Активен</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">В резерве</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <a href="{% url 'server:server_update' server.pk %}" class="btn btn-sm btn-outline-primary user-restricted">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'server:server_delete' server.pk %}" class="btn btn-sm btn-outline-danger user-restricted">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-5">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            Серверы не найдены
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,220 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Панель управления - SMDB{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Панель управления</h1>
+        <div class="user-restricted">
+            <a href="{% url 'datacenter:city_create' %}" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-plus-lg me-1"></i>Добавить город
+            </a>
+            <a href="{% url 'datacenter:datacenter_create' %}" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-plus-lg me-1"></i>Добавить ЦОД
+            </a>
+            <div class="btn-group ms-2">
+                <button type="button" class="btn btn-outline-success btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="bi bi-download me-1"></i>Экспорт
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'accounts:export_cities_csv' %}">
+                        <i class="bi bi-file-earmark-spreadsheet me-2"></i>Города (CSV)
+                    </a></li>
+                    <li><a class="dropdown-item" href="{% url 'accounts:export_datacenters_csv' %}">
+                        <i class="bi bi-file-earmark-spreadsheet me-2"></i>ЦОДы (CSV)
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cities Section -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Города</h5>
+            <span class="badge bg-secondary">Всего: {{ cities.count }}</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th style="width: 40px;"></th>
+                        <th>Название</th>
+                        <th>ЦОДы</th>
+                        <th>Стойки</th>
+                        <th style="width: 150px;">Действия</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for city in cities %}
+                        <tr class="expandable-row" data-details-id="city-details-{{ city.slug }}">
+                            <td>
+                                <button class="btn btn-sm btn-link expand-toggle p-0">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td><strong>{{ city.name }}</strong></td>
+                            <td>{{ city.datacenters.count }}</td>
+                            <td>
+                                {% widthratio city.total_racks_count 1 1 %}
+                            </td>
+                            <td>
+                                <a href="{% url 'datacenter:city_update' city.slug %}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'datacenter:city_delete' city.slug %}"
+                                   class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr id="city-details-{{ city.slug }}" class="details-row">
+                            <td colspan="5" class="p-3">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Информация</h6>
+                                        <p><strong>Описание:</strong> {{ city.description|default:"Не указано" }}</p>
+                                        <p><strong>Статус:</strong>
+                                            {% if city.is_active %}
+                                                <span class="badge bg-success">Активен</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Неактивен</span>
+                                            {% endif %}
+                                        </p>
+                                        <p><strong>Защищен:</strong>
+                                            {% if city.is_protected %}
+                                                <span class="badge bg-warning">Да</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Нет</span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>ЦОДы в городе</h6>
+                                        <ul class="list-unstyled">
+                                            {% for dc in city.datacenters.all %}
+                                                <li>
+                                                    <a href="{% url 'datacenter:datacenter_update' dc.slug %}">
+                                                        {{ dc.name }}
+                                                    </a>
+                                                    <small class="text-muted">({{ dc.racks.count }} стоек)</small>
+                                                </li>
+                                            {% empty %}
+                                                <li class="text-muted">Нет ЦОДов</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                Города не найдены
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Datacenters Section -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">ЦОДы</h5>
+            <span class="badge bg-secondary">Всего: {{ datacenters.count }}</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th style="width: 40px;"></th>
+                        <th>Название</th>
+                        <th>Город</th>
+                        <th>Адрес</th>
+                        <th>Стойки</th>
+                        <th style="width: 150px;">Действия</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for dc in datacenters %}
+                        <tr class="expandable-row" data-details-id="dc-details-{{ dc.slug }}">
+                            <td>
+                                <button class="btn btn-sm btn-link expand-toggle p-0">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </td>
+                            <td><strong>{{ dc.name }}</strong></td>
+                            <td>{{ dc.city.name|default:"-" }}</td>
+                            <td>{{ dc.address|truncatechars:30|default:"-" }}</td>
+                            <td>{{ dc.racks.count }}</td>
+                            <td>
+                                <a href="{% url 'datacenter:datacenter_update' dc.slug %}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'datacenter:datacenter_delete' dc.slug %}"
+                                   class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr id="dc-details-{{ dc.slug }}" class="details-row">
+                            <td colspan="6" class="p-3">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Информация о ЦОД</h6>
+                                        <p><strong>Описание:</strong> {{ dc.description|default:"Не указано" }}</p>
+                                        <p><strong>Статус:</strong>
+                                            {% if dc.is_active %}
+                                                <span class="badge bg-success">Активен</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Неактивен</span>
+                                            {% endif %}
+                                        </p>
+                                        <p><strong>Защищен:</strong>
+                                            {% if dc.is_protected %}
+                                                <span class="badge bg-warning">Да</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Нет</span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Стойки в ЦОД</h6>
+                                        <ul class="list-unstyled">
+                                            {% for rack in dc.racks.all %}
+                                                <li>
+                                                    <a href="{% url 'datacenter:rack_update' rack.slug %}">
+                                                        {{ rack.name }}
+                                                    </a>
+                                                    <small class="text-muted">({{ rack.units_count }}U)</small>
+                                                </li>
+                                            {% empty %}
+                                                <li class="text-muted">Нет стоек</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                ЦОДы не найдены
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

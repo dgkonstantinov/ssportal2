@@ -1,0 +1,80 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в систему - SMDB</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="{% static 'css/bootstrap-icons/bootstrap-icons.min.css' %}" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static 'css/ssportal.css' %}" rel="stylesheet">
+</head>
+<body class="login-page">
+    <div class="login-card card">
+        <div class="login-header">
+            <div class="login-logo">
+                <i class="bi bi-hdd-stack"></i>
+            </div>
+            <h3 class="mb-0">SMDB Portal</h3>
+            <p class="text-muted mb-0">Система управления инфраструктурой</p>
+        </div>
+        <div class="card-body p-4">
+            {% if form.errors %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                Неверное имя пользователя или пароль.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endif %}
+
+            {% if next %}
+                {% if user.is_authenticated %}
+                <div class="alert alert-warning" role="alert">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    У вас нет доступа к этой странице.
+                </div>
+                {% endif %}
+            {% endif %}
+
+            <form method="post" action="{% url 'accounts:login' %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+
+                <div class="mb-3">
+                    <label for="id_username" class="form-label">Имя пользователя</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input type="text" class="form-control" id="id_username" name="username"
+                               placeholder="Введите имя пользователя" required autofocus>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="id_password" class="form-label">Пароль</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input type="password" class="form-control" id="id_password" name="password"
+                               placeholder="Введите пароль" required>
+                    </div>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Войти
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="card-footer text-center text-muted py-3">
+            <small>© 2026 SMDB Portal</small>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

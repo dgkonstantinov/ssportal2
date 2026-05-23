@@ -1,0 +1,85 @@
+{% extends 'base/base.html' %}
+
+{% block title %}{{ title }} - SMDB{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">{{ title }}</h1>
+    <div class="d-flex gap-2">
+        <a href="{% url 'server:chassis_export' %}" class="btn btn-outline-success btn-sm user-restricted">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i>Экспорт CSV
+        </a>
+        <a href="{% url 'server:chassis_create' %}" class="btn btn-primary btn-sm user-restricted">
+            <i class="bi bi-plus-lg me-1"></i>Добавить шасси
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Серийный номер</th>
+                        <th>Модель</th>
+                        <th>Тип / Слоты</th>
+                        <th>Локация</th>
+                        <th class="text-center">Серверов</th>
+                        <th>Статус</th>
+                        <th style="width: 120px;" class="text-end">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for chassis in chassis_list %}
+                    <tr>
+                        <td><span class="fw-semibold">{{ chassis.serial_number }}</span></td>
+                        <td>
+                            <div>{{ chassis.model.manufacturer.name }}</div>
+                            <small class="text-muted">{{ chassis.model.name }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ chassis.get_chassis_type_display }}</span>
+                            <span class="text-muted ms-1">({{ chassis.slot_count }} слотов)</span>
+                        </td>
+                        <td>
+                            {% if chassis.rack %}
+                            <div>{{ chassis.rack.datacenter.name }}</div>
+                            <small class="text-muted">{{ chassis.rack.name }}</small>
+                            {% else %}
+                            <span class="text-muted">Не в стойке</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-primary rounded-pill">{{ chassis.server_count }}</span>
+                        </td>
+                        <td>
+                            {% if chassis.is_active %}
+                            <span class="badge bg-success">Активно</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Неактивно</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <a href="{% url 'server:chassis_update' chassis.pk %}" class="btn btn-sm btn-outline-primary user-restricted">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'server:chassis_delete' chassis.pk %}" class="btn btn-sm btn-outline-danger user-restricted">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-5">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            Шасси не найдены
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
