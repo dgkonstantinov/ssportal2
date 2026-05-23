@@ -76,6 +76,12 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "OPTIONS": {
             "read_default_file": config['general']['db_config'],
+            "charset": "utf8mb4",  # Обязательно для emoji и кириллицы
+            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
+        "TEST": {
+            "CHARSET": "utf8mb4",
+            "COLLATION": "utf8mb4_unicode_ci",
         },
     }
 }
@@ -170,6 +176,11 @@ LOGGING = {
             'propagate': False,
         },
     },
+}
+
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
 }
 
 LOGIN_URL = 'accounts:login'
