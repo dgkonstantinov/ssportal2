@@ -2,18 +2,12 @@
 from slugify import slugify  # python-slugify
 
 
-# import os
-# import re
-# from django.conf import settings
-# from django.shortcuts import redirect
-# from django.http import HttpResponse, Http404
-# import datetime
-# from django.utils import timezone
-
 def create_slug(value: str):
-    if value.count('.'):
-        value = value.strip('.')
-        value = value[0]
+    value = value.strip()
+
+    if '.' in value:
+        value = value.split('.')[0]
+
     return slugify(value)
 
 # def is_ip_address(value):
